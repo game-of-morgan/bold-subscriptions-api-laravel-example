@@ -1,15 +1,24 @@
-# Bold Subscriptions API
-#### Laravel Example
+# Bold Subscriptions API - Laravel Example
 
-Example app for working with the Bold Subscriptions API. This example leverages the [Laravel](https://laravel.com/) PHP framework.
+## About
 
-[View Bold third party API documentation](http://docs.boldapps.net/ro-third-party-api/index.html#update-next-order-date)
+Bold Subscriptions customers using the **Advanced** plan or higher can use our third party API to interact with subscription data in unique ways. Including the ability to modify, cancel and report on subscriptions. Contact [Bold Commerce](https://boldcommerce.com/) for more information on this API and gaining access.
 
-## Purpose
+This example app leverages the [Laravel](https://laravel.com/) PHP framework and showcases how to interact with the Bold Subscriptions API.
 
-Bold Subscriptions customers using the **Advanced** plan or higher can use our third party API to interact with subscription data in unique ways. Including the ability to modify, cancel and report on subscriptions.
+[View Bold third party API documentation](http://docs.boldapps.net/ro-third-party-api/index.html)
 
-## Install
+## Getting Started
+
+### Prerequisites
+
+To run this application you will need the following software installed:
+
+* [Composer](https://getcomposer.org/)
+* PHP ^7.2
+* [PHPUnit 8](https://phpunit.de/getting-started/phpunit-8.html) for executing tests
+
+### Install
 
 1. Clone the repository
 2. Install project dependencies
@@ -30,12 +39,13 @@ Bold Subscriptions customers using the **Advanced** plan or higher can use our t
     * **BOLD_API_HANDLE** - App handle created in the Bold Subscriptions app
     * **MYSHOPIFY_DOMAIN** - The myshopify domain that Bold Subscriptions is installed on (e.g. example-site.myshopify.com)
 
-## Use
+### Use
 
-As part of this project there is one example console command you can run:
+As part of this project there are two example console commands you can run:
 
 ```console
 $ php artisan bold:update_next_order_date <shopify_customer_id> <subscription_id> <next_order_date>
+$ php artisan bold:get_products <shopify_customer_id> <subscription_id>
 ```
 
 Replace the following arguments appropriately:
@@ -44,11 +54,19 @@ Replace the following arguments appropriately:
 * **<subscription_id>** - The ID of the customer's subscription in Bold Subscriptions
 * **<next_order_date>** - The customer's new next order date (e.g. `2019-10-21`)
 
+### Run tests
+
+Running these tests will verify you have set up your environment variables correctly
+
+```console
+$ phpunit
+```
+
 ## Example code explained
 
 #### UpdateNextOrderDate
 
-**File:** `app/Console/Commands/UpdateNextOrderDate.php`
+**File:** [UpdateNextOrderDate.php](app/Console/Commands/UpdateNextOrderDate.php)
 
 This is a Laravel console command class which describes the command signature and how to handle running it. This command is handled by making a call to the *BoldApiService* `updateNextOrderDate` function.
 
@@ -56,7 +74,7 @@ This is a Laravel console command class which describes the command signature an
 
 #### BoldApiService
 
-**File:** `app/Services/BoldApiService.php`
+**File:** [BoldApiService.php](app/Services/BoldApiService.php)
 
 This file is responsible for making an API request to the Bold API. In the **constructor** it will first instantiate a Guzzle Client for making HTTP requests.
 
@@ -70,7 +88,7 @@ When `updateNextOrderDate` is called it will use the Guzzle client and execute a
 
 #### BoldApiRequestHandler
 
-**File:** `app/Handlers/BoldApiRequestHandler.php`
+**File:** [BoldApiRequestHandler.php](app/Handlers/BoldApiRequestHandler.php)
 
 This file is responsible for ensuring each request has all the appropriate headers  and query parameters before being made. It is also responsible for gaining a temporary authorization code which will be used for subsequent API requests.
 
@@ -88,7 +106,7 @@ After the request is complete the `__invoke` method of BoldApiResponseHandler is
 
 #### BoldApiResponseHandler
 
-**File:** `app/Handlers/BoldApiResponseHandler.php`
+**File:** [BoldApiResponseHandler.php](app/Handlers/BoldApiResponseHandler.php)
 
 Since the authorization code will expire after an amount of time (24 hours, subject to change) you need to ensure you re-authenticate when that happens. This file is responsible for checking if the response from the API was an *Unauthorized* status code (401). If it is then it will automatically re-authenticate and grab a new token for the next request.
 
@@ -97,4 +115,3 @@ Since the authorization code will expire after an amount of time (24 hours, subj
 ## License
 
 This project is licensed under the MIT License - see the **LICENSE** file for details.
-

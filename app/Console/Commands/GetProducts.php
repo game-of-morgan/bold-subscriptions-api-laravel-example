@@ -5,21 +5,21 @@ namespace App\Console\Commands;
 use App\Services\BoldApiService;
 use Illuminate\Console\Command;
 
-class UpdateNextOrderDate extends Command
+class GetProducts extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'bold:update_next_order_date {shopify_customer_id} {subscription_id} {next_order_date}';
+    protected $signature = 'bold:get_products {shopify_customer_id} {subscription_id}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Update the next order date for a customer';
+    protected $description = 'Get the products in a customer\'s subscription';
 
     /**
      * Create a new command instance.
@@ -43,11 +43,9 @@ class UpdateNextOrderDate extends Command
 
         $shopifyCustomerId = $this->argument('shopify_customer_id');
         $subscriptionId = $this->argument('subscription_id');
-        $nextOrderDate = $this->argument('next_order_date');
 
-        $boldApiService->updateNextOrderDate($shopifyCustomerId, $subscriptionId, $nextOrderDate);
-        $boldApiService->getProducts($shopifyCustomerId, $subscriptionId);
+        $products = $boldApiService->getProducts($shopifyCustomerId, $subscriptionId);
 
-        $this->info('Api request completed successfully');
+        $this->info(json_encode($products['data']));
     }
 }

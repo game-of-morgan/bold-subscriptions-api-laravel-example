@@ -5,6 +5,7 @@ use App\Handlers\BoldApiRequestHandler;
 use App\Handlers\BoldApiResponseHandler;
 use function GuzzleHttp\choose_handler;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 
@@ -48,25 +49,47 @@ class BoldApiService {
      * @param $shopifyCustomerId
      * @param $subscriptionId
      * @param $nextOrderDate
-     * @return bool
+     * @return bool|mixed
      */
     public function updateNextOrderDate($shopifyCustomerId, $subscriptionId, $nextOrderDate)
     {
         /**
          * Make the request to the API
-         * Note: Adding the auth token header is handled in BoldApiRequestHandler
+         * Note: Adding the authorization header and shop query param is handled in BoldApiRequestHandler
          */
-        $res = $this->client->put('manage/subscription/orders/'.$subscriptionId.'/next_ship_date?customer_id='.$shopifyCustomerId, [
-            'json' => [
-                'next_shipping_date' => $nextOrderDate,
-            ]
-        ]);
+        try {
+            $res = $this->client->put('manage/subscription/orders/'.$subscriptionId.'/next_ship_date?customer_id='.$shopifyCustomerId, [
+                'json' => [
+                    'next_shipping_date' => $nextOrderDate,
+                ]
+            ]);
 
-        $result = json_decode($res->getBody(), true);
+            $result = json_decode($res->getBody(), true);
+        }
+        catch (ClientException $e) {
+            return ['status' => $e->getResponse()->getStatusCode()];
+        }
 
-        /**
-         * Need to ensure status is 200, otherwise there is an error
-         */
-        return $res->getStatusCode() === 200 && json_last_error() === JSON_ERROR_NONE ? $result : false;
+        return $result;
+    }
+
+    /**
+     * Get products in a customer's subscription
+     *
+     * @param $shopifyCustomerId
+     * @param $subscriptionId
+     * @return bool|mixed
+     */
+    public function getProducts($shopifyCustomerId, $subscriptionId)
+    {
+        try {
+            $res = $this->client->get('manage/subscription/orders/'.$subscriptionId.'/products?customer_id='.$shopifyCustomerId);
+            $result = json_decode($res->getBody(), true);
+        }
+        catch (ClientException $e) {
+            return ['status' => $e->getResponse()->getStatusCode()];
+        }
+
+        return $result;
     }
 }
